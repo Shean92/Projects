@@ -8,4 +8,4 @@ I made this program for Brigham Young University of Idaho. These programs helped
 Collect and Server Tester are two folders that work together. In the Collect program I search a specified folder for all the files in each sub folder and I pull out the information associated with those files, such as: owner, date created, date modified, size of file, etc.
 
 ### Server Tester:
-The Server Tester folder works with the Collect folder. After I run the collect program and recieve all the data from the files, I run the Server Tester program. In the Server Tester program I take the names of all the files and run them in an http request. I recieve the status code from each of the files and I make a new file with this information and I include the information from Collect.
+The Server Tester folder works with the Collect folder. After I run the collect program and recieve all the data from the files, I run the Server Tester program. In the Server Tester program I take the names of all the files and run them in an http request. I recieve the status code from each of the files and I make a new file with this information, I also include the information from Collect.
