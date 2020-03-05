@@ -16,7 +16,7 @@ namespace Collect
 
             using (StreamWriter sw = new StreamWriter(fullPath))
             {
-                sw.WriteLine("Url, Site, Type, Size, Date Created, Date Modified, Sub-Directories, Owner");
+                sw.WriteLine("Url| Site| Type| Size| Date Created| Date Modified| Sub-Directories| Owner");
             }
             
 
@@ -90,7 +90,7 @@ namespace Collect
                     string subs = subsCount.ToString();
                     using (StreamWriter writeIntoFile = new StreamWriter(newFile, true))
                     {
-                        string line = String.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}", file, site, type, size, creationDate, modDate, subs, owner);
+                        string line = String.Format("{0}| {1}| {2}| {3}| {4}| {5}| {6}| {7}", file, site, type, size, creationDate, modDate, subs, owner);
                         writeIntoFile.WriteLine(line);
                     }
                     Console.WriteLine(Path.GetFullPath(file));
