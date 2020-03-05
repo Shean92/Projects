@@ -1,120 +1,120 @@
-﻿using CsvHelper;
-using System;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
-using System.Security.AccessControl;
-using System.Security.Principal;
+using System.Linq;
+using System.Net;
 
-namespace Collect
+namespace ServerTester
 {
     class Program
     {
         static void Main(string[] args)
         {
-            //create a new file with today's date everytime we run the program.
-            string newFileName = "Collected_Files_employee.csv";
-            string fullPath = Path.Combine("\\\\igxur\\igxsites\\cms101\\pb24\\lehi3-scraper\\src\\New Scraper c#\\Collect", newFileName);
+            //read csv file.
+            //change the path to have www2.byui.edu/<filepath>
+            //query file but don't recieve, only test server status of url
+            //repeat
+            //Change!!!!!
+            string fileToReadFull = @"\\igxur\igxsites\cms101\pb24\lehi3-scraper\src\New Scraper c#\Collect\Collected_Files_employee.csv";
 
-            using (StreamWriter sw = new StreamWriter(fullPath))
-            {
-                sw.WriteLine("Url| Site| Type| Size| Date Created| Date Modified| Sub-Directories| Owner");
-            }
-            
-
-            Console.WriteLine("File created successfully");
+            Console.WriteLine("This will overwrite all lines in the file you have specified, are you ready?");
             Console.ReadLine();
-
-            string errors = "";
-            //the directory we want to find all files from.
-            ListFilesInDirectory(@"\\lehi3\www$\", fullPath, errors);
-            Console.Write("Done");
-            Console.Read();
-
-            //finished searching
+            int length = 0;
+            ArrayList urls = new ArrayList();
+            // open the file "Collected_Files.csv"
+            IEnumerable<string> lines = File.ReadLines(fileToReadFull);
+            lines = lines.Skip(1).ToArray();
+            foreach (string line in lines)
+            {
+                string[] delimitedLine = line.Split('|');
+                string newLine = delimitedLine[0].Replace(@"\\lehi3\emp$\", @"http://emp.byui.edu/");
+                newLine = newLine.Replace(@"\", @"/");
+                urls.Add(newLine);
+                Console.WriteLine(line);
+                length++;
+            }
+            TestServerStatus(urls, length, lines);
+            Console.WriteLine("Done");
+            Console.ReadLine();
         }
 
-        static void ListFilesInDirectory(string workingDirectory, string newFile = "", string errors = "")
+        static void TestServerStatus(ArrayList urls, int length, IEnumerable<string> linesOld)
         {
-            string[] filePaths = Directory.GetFiles(workingDirectory);
-            string[] directoryPaths = Directory.GetDirectories(workingDirectory);
-
-            //put the file name, folder, and paths into the newFile
-            try
+            string newFullPath = @"\\igxur\igxsites\cms101\pb24\lehi3-scraper\src\New Scraper c#\ServerTest\ServerTester\Server_Status_Final_employee.csv";
+            using (StreamWriter sw = File.CreateText(newFullPath))
             {
-                foreach (string file in filePaths)
+                sw.WriteLine("Url| Status| Directory| Type| Size| Created| Modified| SubDirectories| Owner");
+            }
+            string errors = "";
+
+            //get the url
+            int i = 0;
+            foreach (string line in linesOld)
+            {
+
+                int status = 0;
+                string[] delimitedLine = line.Split('|');
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                if(i > length)
                 {
-                    //get the file extension ex: .jpeg
-                    string type = Path.GetExtension(file);
-                    if (type == ".css" || type ==  ".js" || type == ".ini" || type == ".db" || type == ".ds_store")
-                    {
-                        continue;
-                    }
-                    //get user who created file
-                    IdentityReference sid = null;
-                    string owner = "";
-                    try
-                    {
-
-                        FileSecurity fileSecurity = File.GetAccessControl(file);
-                        sid = fileSecurity.GetOwner(typeof(SecurityIdentifier));
-                        NTAccount ntAccount = sid.Translate(typeof(NTAccount)) as NTAccount;
-                        owner = ntAccount.Value;
-
-                    }
-                    catch (IdentityNotMappedException ex)
-                    {
-                            if(sid != null)
-                            {
-                                owner = sid.ToString();
-                            }
-                    }
-                    //string user = File.GetAccessControl(file).GetOwner(typeof(NTAccount)).ToString();
-                    //get other info
-                    DateTime creation = File.GetCreationTime(file);
-                    string creationDate = creation.ToString("yyyy/MM/dd");
-                    DateTime modification = File.GetLastWriteTime(file);
-                    string modDate = modification.ToString("yyyy/MM/dd");
-                    string[] siteSplit = file.Split('\\');
-                    string site = siteSplit[4]; //the first directory in the file path
-                    if (site.Contains("."))
-                    {
-                        site = @"\";
-                    }
-                    long sizeBytes = new FileInfo(file).Length;
-                    string size = sizeBytes.ToString();
-                    size = String.Format("{0}B", size);
-                    int subsCount = siteSplit.Length - 5; //how many sub directories
-                    if (site.Contains(@"\"))
-                    {
-                        subsCount = 0;
-                    }
-                    string subs = subsCount.ToString();
-                    using (StreamWriter writeIntoFile = new StreamWriter(newFile, true))
-                    {
-                        string line = String.Format("{0}| {1}| {2}| {3}| {4}| {5}| {6}| {7}", file, site, type, size, creationDate, modDate, subs, owner);
-                        writeIntoFile.WriteLine(line);
-                    }
-                    Console.WriteLine(Path.GetFullPath(file));
+                    watch.Stop();
+                    continue;
                 }
-                foreach (string folder in directoryPaths)
+                //test server
+                //use url to test server
+                //record status but don't recieve content
+                //status change
+                try
+                {
+                    HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(urls[i].ToString());
+                    request.AllowAutoRedirect = false;
+                    request.Method = "HEAD";
+                    request.Proxy = null;
+                    ServicePointManager.DefaultConnectionLimit = 4;
+                    using (var response = request.GetResponse() as HttpWebResponse)
+                    {
+                            status = (int)response.StatusCode;
+                        response.Close();
+                    }
+                }
+                catch (WebException we)
                 {
                     try
                     {
-                        ListFilesInDirectory(Path.GetFullPath(folder), newFile, errors);
+                        HttpWebResponse errorResponse = we.Response as HttpWebResponse;
+                        status = (int)errorResponse.StatusCode;
+                        errorResponse.Close();
                     }
-                    catch (UnauthorizedAccessException)
+                    catch (NullReferenceException)
                     {
-                        Console.WriteLine("Unautherized Access Exception: " + folder);
-                        errors += folder + "\n";
-                        continue;
+                        HttpWebResponse errorResponse = we.Response as HttpWebResponse;
+                        status = (int)errorResponse.StatusCode;
+                        errorResponse.Close();
                     }
                 }
+                catch (UriFormatException)
+                {
+                    errors += delimitedLine[0] + "\nformat exception\n";
+                }
+                catch (NullReferenceException)
+                {
+                    errors += delimitedLine[0] + "\nNull reference exception\n";
+                }
+
+                Console.WriteLine("Status recieved: " + status);
+                using (StreamWriter sw = new StreamWriter(newFullPath, true))
+                {
+                    string newLine = String.Format("{0}| {1}| {2}| {3}| {4}| {5}| {6}| {7}| {8}", delimitedLine[0], status, delimitedLine[1], delimitedLine[2], delimitedLine[3], delimitedLine[4], delimitedLine[5], delimitedLine[6], delimitedLine[7]);
+                    sw.WriteLine(newLine);
+                }
+                i++;
+                watch.Stop();
+                var elapsedMs = watch.ElapsedMilliseconds;
+                Console.WriteLine("Line: " + i);
+                Console.WriteLine(elapsedMs);
             }
-            catch (System.Exception)
-            {
-                Console.WriteLine("Error!!!");
-            }
-            Console.WriteLine("List of errors:" + errors + "\nEND ERRORS LIST");
+            Console.WriteLine(errors);
         }
     }
 }
-
