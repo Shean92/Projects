@@ -1,7 +1,7 @@
 # Projects
 My official repository to hold my projects I want to share
 
-Http Server Status Program
+Http Server Status Program:
 I made this program for Brigham Young University of Idaho. These programs helped the employee in charge of correcting, deleting and reorganizing files. I had never used ".net" before and this was a wonderful experience for me to learn how it all works. I finished these programs over the course of 2 weeks or 60 hours of total work time. I learned how http requests are made, I learned how to use exceptions to my advantage, and I learned valuable search techniques to find the help that I needed. This experience gave me confidence to trust in my own work and to realize that I am capable of doing anything I set my mind to. I started these programs from scratch without any supervision of my code. There were no other students or employees who could help me with my code or correct me since I am the only software engineering student in my department. I learned from trial and error which I believe improved my ability to trust myself and to find out how to solve problems on my own. There were times when I became frustrated, but I never gave up and the sense of progress and accomplishment that each step gave me kept me moving forward. I continued looking for optimization techniques and better ways to accomplish my task. This experience was one of my most favorite and challenging experiences so far.
 
 
