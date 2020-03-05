@@ -7,10 +7,8 @@ I made this program for Brigham Young University of Idaho. These programs helped
 
 The reason I separated these two files was because I did not want to convolute the Collect program with the Server Tester program. I often think about testing the status of each of the files from the Collect file directly after I pull them, but there are some complications. We want to keep the name of the file path, and in order to test the file's server status we needed to change the name of the file to be a URL temporarily. I felt it was too complicated to do all of this in one program and I felt that since they do separate tasks they should stay separate.
 
-{
-Collect
+Collect:
 Collect and Server Tester are two folders that work together. In the Collect program I search a specified folder for all the files in each sub folder and I pull out the information associated with those files, such as: owner, date created, date modified, size of file, etc.
 
-Server Tester
+Server Tester:
 The Server Tester folder works with the Collect folder. After I run the collect program and recieve all the data from the files, I run the Server Tester program. In the Server Tester program I take the names of all the files and run them in an http request. I recieve the status code from each of the files and I make a new file with this information and I include the information from Collect.
-}
