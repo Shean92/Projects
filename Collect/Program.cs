@@ -16,6 +16,7 @@ namespace Collect
 
             using (StreamWriter sw = new StreamWriter(fullPath))
             {
+                //I made the comma separated values = | because files had , or . in the name
                 sw.WriteLine("Url| Site| Type| Size| Date Created| Date Modified| Sub-Directories| Owner");
             }
             
@@ -44,10 +45,13 @@ namespace Collect
                 {
                     //get the file extension ex: .jpeg
                     string type = Path.GetExtension(file);
+                    
+                    //if the file is not any of these values skip it and move on to the next file.
                     if (type == ".css" || type ==  ".js" || type == ".ini" || type == ".db" || type == ".ds_store")
                     {
                         continue;
                     }
+                    
                     //get user who created file
                     IdentityReference sid = null;
                     string owner = "";
@@ -60,6 +64,7 @@ namespace Collect
                         owner = ntAccount.Value;
 
                     }
+                    //the owner was not specified
                     catch (IdentityNotMappedException ex)
                     {
                             if(sid != null)
@@ -67,7 +72,10 @@ namespace Collect
                                 owner = sid.ToString();
                             }
                     }
+                    
+                    //next line is kept as a reference only
                     //string user = File.GetAccessControl(file).GetOwner(typeof(NTAccount)).ToString();
+                    
                     //get other info
                     DateTime creation = File.GetCreationTime(file);
                     string creationDate = creation.ToString("yyyy/MM/dd");
@@ -75,6 +83,8 @@ namespace Collect
                     string modDate = modification.ToString("yyyy/MM/dd");
                     string[] siteSplit = file.Split('\\');
                     string site = siteSplit[4]; //the first directory in the file path
+                    
+                    //if the site (directory value) turns out to be a file itself make it \ 
                     if (site.Contains("."))
                     {
                         site = @"\";
@@ -83,6 +93,8 @@ namespace Collect
                     string size = sizeBytes.ToString();
                     size = String.Format("{0}B", size);
                     int subsCount = siteSplit.Length - 5; //how many sub directories
+                    
+                    // this happens because it is the file and root directory
                     if (site.Contains(@"\"))
                     {
                         subsCount = 0;
@@ -90,11 +102,14 @@ namespace Collect
                     string subs = subsCount.ToString();
                     using (StreamWriter writeIntoFile = new StreamWriter(newFile, true))
                     {
+                        //save the file info into the CSV file
                         string line = String.Format("{0}| {1}| {2}| {3}| {4}| {5}| {6}| {7}", file, site, type, size, creationDate, modDate, subs, owner);
                         writeIntoFile.WriteLine(line);
                     }
                     Console.WriteLine(Path.GetFullPath(file));
                 }
+                
+                //run through each folder and sub folder with this foreach loop. This is a recursive loop so we scour each folder, subfolder, and file
                 foreach (string folder in directoryPaths)
                 {
                     try
@@ -109,6 +124,7 @@ namespace Collect
                     }
                 }
             }
+            //make a list of all errors found while reading through the files
             catch (System.Exception)
             {
                 Console.WriteLine("Error!!!");
